@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 '''
 maze_clause.py
 
@@ -7,6 +8,7 @@ MazePropositions (2-tuples of (symbol, location)) mapped to
 their negated status in the sentence.
 '''
 import unittest
+from pprint import pprint
 
 class MazeClause:
     
@@ -22,6 +24,9 @@ class MazeClause:
         self.valid = False # Might change as you're loading in the props
         # TODO: Process list of propositions to make a correctly
         # formatted MazeClause
+
+        for tup in props:
+            self.props[tup[0]] = tup[1]
     
     def get_prop(self, prop):
         """
@@ -35,6 +40,19 @@ class MazeClause:
         """
         # TODO: This is currently implemented incorrectly; see
         # spec for details!
+
+        print("INCOMING PROP:")
+        pprint(prop)
+        # pprint(self.props)
+        if prop in self.props:
+            print("PROP IN PROPS: YES")
+            pprint(prop)
+            return self.props[prop]
+        else:
+            print("PROP IN PROPS: NO")
+            pprint(prop)
+            return False
+
         return False
     
     def is_valid(self):
@@ -56,7 +74,7 @@ class MazeClause:
         """
         # TODO: This is currently implemented incorrectly; see
         # spec for details!
-        return False
+        return bool(self.props)
     
     def __eq__(self, other):
         """
@@ -100,12 +118,20 @@ class MazeClause:
 
 class MazeClauseTests(unittest.TestCase):
     def test_mazeprops1(self):
+        print("TEST MAZE PROPS 1")
         mc = MazeClause([(("X", (1, 1)), True), (("X", (2, 1)), True), (("Y", (1, 2)), False)])
+        print("TEST MAZE PROPS 1 - ASSERT 1")
         self.assertTrue(mc.get_prop(("X", (1, 1))))
+        print("TEST MAZE PROPS 1 - ASSERT 2")
         self.assertTrue(mc.get_prop(("X", (2, 1))))
+        print("TEST MAZE PROPS 1 - ASSERT 3")
         self.assertFalse(mc.get_prop(("Y", (1, 2))))
+        print("TEST MAZE PROPS 1 - ASSERT 4")
         self.assertTrue(mc.get_prop(("X", (2, 2))) is None)
+        print("TEST MAZE PROPS 1 - ASSERT 5")
         self.assertFalse(mc.is_empty())
+        # raise SystemExit
+        # sys.exit()
         
     def test_mazeprops2(self):
         mc = MazeClause([(("X", (1, 1)), True), (("X", (1, 1)), True)])

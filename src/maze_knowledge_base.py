@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 '''
 maze_knowledge_base.py
 
