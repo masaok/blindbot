@@ -51,7 +51,7 @@ class MazeClause:
         else:
             print("PROP IN PROPS: NO")
             pprint(prop)
-            return False
+            return None
 
         return False
     
@@ -74,7 +74,7 @@ class MazeClause:
         """
         # TODO: This is currently implemented incorrectly; see
         # spec for details!
-        return bool(self.props)
+        return not bool(self.props)
     
     def __eq__(self, other):
         """
@@ -135,7 +135,9 @@ class MazeClauseTests(unittest.TestCase):
         
     def test_mazeprops2(self):
         mc = MazeClause([(("X", (1, 1)), True), (("X", (1, 1)), True)])
+        print("TEST 2 - ASSERT 1")
         self.assertTrue(mc.get_prop(("X", (1, 1))))
+        print("TEST 2 - ASSERT 2")
         self.assertFalse(mc.is_empty())
         
     def test_mazeprops3(self):
