@@ -8,6 +8,7 @@ MazePropositions (2-tuples of (symbol, location)) mapped to
 their negated status in the sentence.
 '''
 import unittest
+import sys
 from pprint import pprint
 
 class MazeClause:
@@ -113,6 +114,14 @@ class MazeClause:
         results = set()
         # TODO: This is currently implemented incorrectly; see
         # spec for details!
+
+        for tup1 in c1.props:
+            print("RESOLVE > TUP1:")
+            print(tup1)
+            for tup2 in c2.props:
+                print("RESOLVE > TUP2:")
+                print(tup2)
+
         return results
     
 
@@ -152,12 +161,19 @@ class MazeClauseTests(unittest.TestCase):
         self.assertTrue(mc.is_empty())
         
     def test_mazeprops5(self):
+        print("TEST 5 START")
+
         mc1 = MazeClause([(("X", (1, 1)), True)])
         mc2 = MazeClause([(("X", (1, 1)), True)])
         res = MazeClause.resolve(mc1, mc2)
+        print("EXITING!", flush=True)
+        raise SystemError
+        # exit(-1)
         self.assertEqual(len(res), 0)
+        print("TEST 5 END")
         
     def test_mazeprops6(self):
+        print("TEST 6")
         mc1 = MazeClause([(("X", (1, 1)), True)])
         mc2 = MazeClause([(("X", (1, 1)), False)])
         res = MazeClause.resolve(mc1, mc2)
