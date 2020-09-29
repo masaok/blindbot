@@ -11,6 +11,11 @@ import unittest
 import sys
 from pprint import pprint
 
+# "X" is a symbol
+# (1, 1) is the location of the symbol
+# True/False is the negated status
+# (("X", (1, 1)), True) is an assignment of a truth value to the proposition
+
 class MazeClause:
     
     def __init__(self, props):
@@ -18,6 +23,8 @@ class MazeClause:
         Constructor parameterized by the propositions within this clause;
         argument props is a list of MazePropositions, like:
         [(("X", (1, 1)), True), (("X", (2, 1)), True), (("Y", (1, 2)), False)]
+
+        Conversion into prop logic: X(1,1) v X(2,1) v ~Y(1,2)
         
         :props: a list of tuples formatted as: (MazeProposition, NegatedBoolean)
         """
@@ -26,8 +33,28 @@ class MazeClause:
         # TODO: Process list of propositions to make a correctly
         # formatted MazeClause
 
+        print("MAZE > CONSTRUCTOR PROPS > props:")
+        pprint(props)
+
         for tup in props:
-            self.props[tup[0]] = tup[1]
+
+            symbol = tup[0]
+            truth = tup[1]
+
+            if symbol in self.props:
+                print("  SYMBOL EXISTS, checking TRUTH value")
+
+                if truth != self.props[symbol]:
+                    print("  SYMBOL EXISTS > TRUTH value is negated, we're done!")
+                    self.props = {}
+                    self.valid = True
+            else:
+
+                print("  SYMBOL DOES NOT EXIST > tup:")
+                pprint(tup)
+                self.props[symbol] = truth
+                print("MAZE > CONSTRUCTOR PROPS > props > update self.props:")
+                pprint(self.props)
     
     def get_prop(self, prop):
         """
@@ -62,9 +89,7 @@ class MazeClause:
           - True if this clause is logically equivalent with True
           - False otherwise
         """
-        # TODO: This is currently implemented incorrectly; see
-        # spec for details!
-        return False
+        return self.valid
     
     def is_empty(self):
         """
@@ -73,8 +98,10 @@ class MazeClause:
           - False otherwise
         (NB: valid clauses are not empty)
         """
-        # TODO: This is currently implemented incorrectly; see
-        # spec for details!
+
+        if self.valid:
+            return False
+
         return not bool(self.props)
     
     def __eq__(self, other):
@@ -115,13 +142,65 @@ class MazeClause:
         # TODO: This is currently implemented incorrectly; see
         # spec for details!
 
-        for tup1 in c1.props:
+        print("RESOLVE > C1.props:")
+        pprint(c1.props)
+
+        print("RESOLVE > C2.props:")
+        pprint(c2.props)
+
+        # Tuples to be passed to the resulting MazeClause
+        # tuples = []
+        tuples = set()
+
+        for tup1, bool1 in c1.props.items():
             print("RESOLVE > TUP1:")
             print(tup1)
-            for tup2 in c2.props:
-                print("RESOLVE > TUP2:")
-                print(tup2)
+            print(bool1)
 
+            addToSet = True
+            for tup2, bool2 in c2.props.items():
+                print("  RESOLVE > TUP2:")
+                print("  ", end = '')
+                print(tup2)
+                print("  ", end = '')
+                print(bool2)
+                if tup1 == tup2:
+                    print("    EQUAL!")
+                    if bool1 != bool2:
+                        print("      OPPOSITE SIGNS!")
+                        addToSet = False
+            
+            if addToSet:
+                print("      ADDING TO SET!")
+                tuples.add((tup1, bool1))
+
+        for tup1, bool1 in c2.props.items():
+            print("RESOLVE > TUP1:")
+            print(tup1)
+            print(bool1)
+
+            addToSet = True
+            for tup2, bool2 in c1.props.items():
+                print("  RESOLVE > TUP2:")
+                print("  ", end = '')
+                print(tup2)
+                print("  ", end = '')
+                print(bool2)
+                if tup1 == tup2:
+                    print("    EQUAL!")
+                    if bool1 != bool2:
+                        print("      OPPOSITE SIGNS!")
+                        addToSet = False
+            
+            if addToSet:
+                print("      ADDING TO SET!")
+                tuples.add((tup1, bool1))
+
+        print("TUPLES:")
+        print(tuples)
+
+        result = MazeClause(tuples)
+        results.add(result)
         return results
     
 
@@ -150,25 +229,34 @@ class MazeClauseTests(unittest.TestCase):
         self.assertFalse(mc.is_empty())
         
     def test_mazeprops3(self):
+        print("\nTEST 3 - CONSTRUCTOR")
         mc = MazeClause([(("X", (1, 1)), True), (("Y", (2, 1)), True), (("X", (1, 1)), False)])
+        # mc = MazeClause([
+        #     (("X", (1, 1)), True), (("X", (1, 1)), False),
+        #     (("Y", (1, 1)), True), (("Y", (1, 1)), False),
+        #     (("Z", (1, 1)), True)
+        #     ])
+        print("\nTEST 3 - ASSERT 1")
         self.assertTrue(mc.is_valid())
+        print("TEST 3 - ASSERT 2")
         self.assertTrue(mc.get_prop(("X", (1, 1))) is None)
+        print("TEST 3 - ASSERT 3")
         self.assertFalse(mc.is_empty())
         
     def test_mazeprops4(self):
+        print("TEST 4 START")
         mc = MazeClause([])
         self.assertFalse(mc.is_valid())
         self.assertTrue(mc.is_empty())
+        print("TEST 4 END")
         
     def test_mazeprops5(self):
-        print("TEST 5 START")
+        print("\nTEST 5 START")
 
         mc1 = MazeClause([(("X", (1, 1)), True)])
         mc2 = MazeClause([(("X", (1, 1)), True)])
         res = MazeClause.resolve(mc1, mc2)
-        print("EXITING!", flush=True)
-        raise SystemError
-        # exit(-1)
+        print("\nTEST 5 - ASSERT 1")
         self.assertEqual(len(res), 0)
         print("TEST 5 END")
         
@@ -181,6 +269,7 @@ class MazeClauseTests(unittest.TestCase):
         self.assertTrue(MazeClause([]) in res)
         
     def test_mazeprops7(self):
+        print("TEST 7 START")
         mc1 = MazeClause([(("X", (1, 1)), True), (("Y", (1, 1)), True)])
         mc2 = MazeClause([(("X", (1, 1)), False), (("Y", (2, 2)), True)])
         res = MazeClause.resolve(mc1, mc2)
@@ -188,24 +277,28 @@ class MazeClauseTests(unittest.TestCase):
         self.assertTrue(MazeClause([(("Y", (1, 1)), True), (("Y", (2, 2)), True)]) in res)
         
     def test_mazeprops8(self):
+        print("TEST 8 START")
         mc1 = MazeClause([(("X", (1, 1)), True), (("Y", (1, 1)), False)])
         mc2 = MazeClause([(("X", (1, 1)), False), (("Y", (1, 1)), True)])
         res = MazeClause.resolve(mc1, mc2)
         self.assertEqual(len(res), 0)
         
     def test_mazeprops9(self):
+        print("TEST 9 START")
         mc1 = MazeClause([(("X", (1, 1)), True), (("Y", (1, 1)), False), (("Z", (1, 1)), True)])
         mc2 = MazeClause([(("X", (1, 1)), False), (("Y", (1, 1)), True), (("W", (1, 1)), False)])
         res = MazeClause.resolve(mc1, mc2)
         self.assertEqual(len(res), 0)
         
     def test_mazeprops10(self):
+        print("TEST 10 START")
         mc1 = MazeClause([(("X", (1, 1)), True), (("Y", (1, 1)), False), (("Z", (1, 1)), True)])
         mc2 = MazeClause([(("X", (1, 1)), False), (("Y", (1, 1)), False), (("W", (1, 1)), False)])
         res = MazeClause.resolve(mc1, mc2)
         self.assertEqual(len(res), 1)
         self.assertTrue(MazeClause([(("Y", (1, 1)), False), (("Z", (1, 1)), True), (("W", (1, 1)), False)]) in res)
+        print("TEST 10 END")
         
 if __name__ == "__main__":
-    unittest.main()
+    unittest.main(failfast=True)
     
