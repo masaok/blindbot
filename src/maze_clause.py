@@ -199,7 +199,9 @@ class MazeClause:
 
         result = MazeClause(tuples)
         results = set()
-        results.add(result)
+
+        if not result.is_valid(): # only add the MC3 if it's not vacuous (valid)
+            results.add(result)
         return results
     
 
