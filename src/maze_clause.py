@@ -138,26 +138,35 @@ class MazeClause:
         :c1: A MazeClause to resolve with c2
         :c2: A MazeClause to resolve with c1
         """
-        results = set()
         # TODO: This is currently implemented incorrectly; see
         # spec for details!
 
-        print("RESOLVE > C1.props:")
-        pprint(c1.props)
+        # print("RESOLVE > C1.props:")
+        # pprint(c1.props)
 
-        print("RESOLVE > C2.props:")
-        pprint(c2.props)
+        # print("RESOLVE > C2.props:")
+        # pprint(c2.props)
+
+        # c1len = len(c1.props.keys())
+        # c2len = len(c2.props.keys())
+        # print("RESOLVE > C1.length: " + str(c1len))
+        # print("RESOLVE > C2.length: " + str(c2len))
+
+        # maxLength = c1len if c1len > c2len else c1len
 
         # Tuples to be passed to the resulting MazeClause
         # tuples = []
         tuples = set()
+        # negationsFound = 0
+
+        negatedProposition = None
 
         for tup1, bool1 in c1.props.items():
             print("RESOLVE > TUP1:")
             print(tup1)
             print(bool1)
 
-            addToSet = True
+            # addToSet = True
             for tup2, bool2 in c2.props.items():
                 print("  RESOLVE > TUP2:")
                 print("  ", end = '')
@@ -168,38 +177,28 @@ class MazeClause:
                     print("    EQUAL!")
                     if bool1 != bool2:
                         print("      OPPOSITE SIGNS!")
-                        addToSet = False
-            
-            if addToSet:
-                print("      ADDING TO SET!")
-                tuples.add((tup1, bool1))
+                        # addToSet = False
+                        # negationsFound += 1
+                        negatedProposition = tup1
 
-        for tup1, bool1 in c2.props.items():
-            print("RESOLVE > TUP1:")
-            print(tup1)
-            print(bool1)
+        if negatedProposition == None:
+            print("NO NEGATED PROP FOUND!")
+            return set()
+        else:
+            # Loop through each input, adding to tuples, skipping the negated prop
+            for tup1, bool1 in c1.props.items():
+                if tup1 != negatedProposition:
+                    tuples.add((tup1, bool1))
 
-            addToSet = True
-            for tup2, bool2 in c1.props.items():
-                print("  RESOLVE > TUP2:")
-                print("  ", end = '')
-                print(tup2)
-                print("  ", end = '')
-                print(bool2)
-                if tup1 == tup2:
-                    print("    EQUAL!")
-                    if bool1 != bool2:
-                        print("      OPPOSITE SIGNS!")
-                        addToSet = False
-            
-            if addToSet:
-                print("      ADDING TO SET!")
-                tuples.add((tup1, bool1))
+            for tup2, bool2 in c2.props.items():
+                if tup2 != negatedProposition:
+                    tuples.add((tup2, bool2))
 
         print("TUPLES:")
         print(tuples)
 
         result = MazeClause(tuples)
+        results = set()
         results.add(result)
         return results
     
@@ -255,6 +254,8 @@ class MazeClauseTests(unittest.TestCase):
 
         mc1 = MazeClause([(("X", (1, 1)), True)])
         mc2 = MazeClause([(("X", (1, 1)), True)])
+
+        print("\nTEST 5 RESOLVE")
         res = MazeClause.resolve(mc1, mc2)
         print("\nTEST 5 - ASSERT 1")
         self.assertEqual(len(res), 0)
@@ -294,8 +295,14 @@ class MazeClauseTests(unittest.TestCase):
         print("TEST 10 START")
         mc1 = MazeClause([(("X", (1, 1)), True), (("Y", (1, 1)), False), (("Z", (1, 1)), True)])
         mc2 = MazeClause([(("X", (1, 1)), False), (("Y", (1, 1)), False), (("W", (1, 1)), False)])
+        print("\nTEST 10 RESOLVE")
         res = MazeClause.resolve(mc1, mc2)
+        print("\nTEST 10 res.props:")
+        for item in res:
+            print(item.props)
+        print("\nTEST 10 LENGTH 1?")
         self.assertEqual(len(res), 1)
+        print("\nTEST 10 CHECK FOR OTHER MAZE CLAUSE")
         self.assertTrue(MazeClause([(("Y", (1, 1)), False), (("Z", (1, 1)), True), (("W", (1, 1)), False)]) in res)
         print("TEST 10 END")
         
