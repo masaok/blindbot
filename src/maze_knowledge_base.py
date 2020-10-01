@@ -22,7 +22,9 @@ class MazeKnowledgeBase:
         """
         # TODO: This is currently implemented incorrectly; see
         # spec for details!
-        return
+
+        self.clauses.add(clause)
+        # return
         
     def ask (self, query):
         """
@@ -32,6 +34,12 @@ class MazeKnowledgeBase:
         # TODO: Implement resolution inference here!
         # This is currently implemented incorrectly; see
         # spec for details!
+
+        queryProps = query.props
+        queryIsValid = query.valid
+
+        newSet = set()
+
         return False
 
 
